@@ -1,0 +1,23 @@
+image: docker:26
+
+services:
+  - name: docker:26-dind
+    command:
+      - "--insecure-registry=192.168.56.10:5050"
+
+stages:
+  - build
+
+variables:
+  IMAGE_NAME: 192.168.56.10:5050/$CI_PROJECT_PATH
+  IMAGE_TAG: $CI_COMMIT_SHORT_SHA
+
+build_and_push:
+  stage: build
+  script:
+    - echo "$CI_REGISTRY_PASSWORD" | docker login 192.168.56.10:5050 -u "$CI_REGISTRY_USER" --password-stdin
+    - docker build -t 192.168.56.10:5050/$CI_PROJECT_PATH:latest .
+    - docker push 192.168.56.10:5050/$CI_PROJECT_PATH:latest
+
+  only:
+    - main
